@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model colors {
+  color_id Int     @id @default(autoincrement())
+  hex_code String  @db.VarChar
+  value    String  @db.VarChar
+  notes    notes[]
+}
+
+model notes {
+  note_id       Int      @id @default(autoincrement())
+  user_id       String   @db.Uuid
+  title         String?  @db.VarChar
+  content       String?
+  creation_date DateTime @default(now()) @db.Timestamp(6)
+  update_date   DateTime @default(now()) @db.Timestamp(6)
+  color_id      Int
+  on_board      Boolean  @default(false)
+  position_x    Int?     @default(0) @db.SmallInt
+  position_y    Int?     @default(0) @db.SmallInt
+  z_index       Int?     @default(0) @db.SmallInt
+  colors        colors   @relation(fields: [color_id], references: [color_id], onDelete: SetNull, onUpdate: NoAction, map: "fk_color")
+  users         users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_user")
+}
+
+model users {
+  user_id       String   @id @db.Uuid
+  username      String   @db.VarChar
+  email         String   @db.VarChar
+  password      String   @db.VarChar
+  creation_date DateTime @default(now()) @db.Timestamp(6)
+  notes         notes[]
+}
